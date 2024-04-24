@@ -19,7 +19,7 @@ class AsyncSQLAlchemyFactory(Factory):
 
     @classmethod
     async def create(cls, **kwargs):
-        session = cls._meta.sqlalchemy_session
+        session = cls._meta.sqlalchemy_session or cls._meta.sqlalchemy_session_factory()
 
         instance = await super().create(**kwargs)
         # one commit per build to avoid share the same connection
@@ -28,7 +28,7 @@ class AsyncSQLAlchemyFactory(Factory):
 
     @classmethod
     def _create(cls, model_class, *args, **kwargs):
-        session = cls._meta.sqlalchemy_session
+        session = cls._meta.sqlalchemy_session or cls._meta.sqlalchemy_session_factory()
 
         async def maker_coroutine():
             for key, value in kwargs.items():
@@ -52,7 +52,7 @@ class AsyncSQLAlchemyFactory(Factory):
 
     @classmethod
     async def _get_or_create(cls, model_class, *args, **kwargs):
-        session = cls._meta.sqlalchemy_session
+        session = cls._meta.sqlalchemy_session or cls._meta.sqlalchemy_session_factory()
 
         key_fields = {}
         for field in cls._meta.sqlalchemy_get_or_create:
@@ -89,7 +89,7 @@ class AsyncSQLAlchemyFactory(Factory):
 
     @classmethod
     async def _save(cls, model_class, *args, **kwargs):
-        session = cls._meta.sqlalchemy_session
+        session = cls._meta.sqlalchemy_session or cls._meta.sqlalchemy_session_factory()
 
         obj = model_class(*args, **kwargs)
         session.add(obj)

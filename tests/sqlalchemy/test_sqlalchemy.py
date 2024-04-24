@@ -14,7 +14,7 @@ from .factory import (
     WithGetOrCreateFieldFactory,
     WithMultipleGetOrCreateFieldsFactory,
 )
-from .models import MultiFieldModel, SpecialFieldModel
+from .models import MultiFieldModel, SpecialFieldModel, StandardModel
 
 
 class TestSQLAlchemyPkSequence:
@@ -164,3 +164,18 @@ class TestNameConflict:
 
         get_or_created_child = await SpecialFieldWithGetOrCreateFactory()
         assert get_or_created_child.session == ""
+
+
+class TestSQLAlchemySessionFactory:
+    async def test_uses_session_factory_if_sqlalchemy_session_is_none(self):
+        class SQLAlchemySessionFactoryFactory(AsyncSQLAlchemyFactory):
+            class Meta:
+                model = StandardModel
+                sqlalchemy_session = None
+                sqlalchemy_session_factory = lambda: sc_session()
+
+            id = factory.Sequence(lambda n: n)
+            foo = factory.Sequence(lambda n: "foo%d" % n)
+
+        inst0 = await SQLAlchemySessionFactoryFactory.create()
+        assert inst0
